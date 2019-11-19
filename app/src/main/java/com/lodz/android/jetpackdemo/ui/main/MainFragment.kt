@@ -11,7 +11,7 @@ import com.lodz.android.jetpackdemo.R
 class MainFragment : Fragment() {
     private var mViewModel: MainViewModel? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.main_fragment, container, false)
+        return inflater.inflate(R.layout.fragment_main, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

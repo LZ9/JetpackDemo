@@ -1,0 +1,9 @@
+<litepal>
+    <dbname value="jetpack_demo" />
+    <version value="1" />
+    <list>
+        <mapping class="com.lodz.android.jetpackdemo.bean.area.Province" />
+        <mapping class="com.lodz.android.jetpackdemo.bean.area.City" />
+        <mapping class="com.lodz.android.jetpackdemo.bean.area.County" />
+    </list>
+</litepal>
