@@ -1,6 +1,10 @@
 package com.lodz.android.jetpackdemo.ui.area
 
 import android.content.Context
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
+import com.lodz.android.corekt.anko.bindView
 import com.lodz.android.jetpackdemo.R
 import com.lodz.android.pandora.widget.dialog.BaseBottomDialog
 
@@ -11,8 +15,86 @@ import com.lodz.android.pandora.widget.dialog.BaseBottomDialog
  */
 class ChooseAreaDialog(context: Context) : BaseBottomDialog(context ){
 
+    /** 确定按钮 */
+    private val mConfirmBtn by bindView<MaterialButton>(R.id.confirm_btn)
+    /** 省列表 */
+    private val mProvinceRv by bindView<RecyclerView>(R.id.province_rv)
+    private lateinit var mProvinceAdapter :AreaListAdapter
+    /** 城市列表 */
+    private val mCityRv by bindView<RecyclerView>(R.id.city_rv)
+    private lateinit var mCityAdapter :AreaListAdapter
+    /** 地区列表 */
+    private val mCountyRv by bindView<RecyclerView>(R.id.county_rv)
+    private lateinit var mCountyAdapter :AreaListAdapter
+
     override fun getLayoutId(): Int = R.layout.dialog_choose_area
 
+    override fun findViews() {
+        super.findViews()
+        initProvinceRv()
+        initCityRv()
+        initCountyRv()
+    }
 
+    private fun initProvinceRv() {
+        mProvinceAdapter = AreaListAdapter(getContext())
+        val layoutManager = LinearLayoutManager(getContext())
+        layoutManager.orientation = RecyclerView.VERTICAL
+        mProvinceRv.layoutManager = layoutManager
+        mProvinceAdapter.onAttachedToRecyclerView(mProvinceRv)// 如果使用网格布局请设置此方法
+        mProvinceRv.setHasFixedSize(true)
+        mProvinceRv.adapter = mProvinceAdapter
+    }
+
+    private fun initCityRv() {
+        mCityAdapter = AreaListAdapter(getContext())
+        val layoutManager = LinearLayoutManager(getContext())
+        layoutManager.orientation = RecyclerView.VERTICAL
+        mCityRv.layoutManager = layoutManager
+        mCityAdapter.onAttachedToRecyclerView(mCityRv)// 如果使用网格布局请设置此方法
+        mCityRv.setHasFixedSize(true)
+        mCityRv.adapter = mCityAdapter
+    }
+
+    private fun initCountyRv() {
+        mCountyAdapter = AreaListAdapter(getContext())
+        val layoutManager = LinearLayoutManager(getContext())
+        layoutManager.orientation = RecyclerView.VERTICAL
+        mCountyRv.layoutManager = layoutManager
+        mCountyAdapter.onAttachedToRecyclerView(mCountyRv)// 如果使用网格布局请设置此方法
+        mCountyRv.setHasFixedSize(true)
+        mCountyRv.adapter = mCountyAdapter
+    }
+
+
+    override fun setListeners() {
+        super.setListeners()
+
+        mConfirmBtn.setOnClickListener {
+
+        }
+
+        mProvinceAdapter.setOnItemClickListener { viewHolder, item, position ->
+
+        }
+
+        mCityAdapter.setOnItemClickListener { viewHolder, item, position ->
+
+        }
+
+        mCountyAdapter.setOnItemClickListener { viewHolder, item, position ->
+
+        }
+    }
+
+    override fun initData() {
+        super.initData()
+        requestProvinceList()
+    }
+
+    private fun requestProvinceList() {
+
+
+    }
 
 }
