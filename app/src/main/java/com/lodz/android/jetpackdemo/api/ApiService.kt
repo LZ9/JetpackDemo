@@ -1,4 +1,4 @@
-package com.lodz.android.jetpackdemo.api.service
+package com.lodz.android.jetpackdemo.api
 
 import com.lodz.android.jetpackdemo.bean.area.CityBean
 import com.lodz.android.jetpackdemo.bean.area.CountyBean
