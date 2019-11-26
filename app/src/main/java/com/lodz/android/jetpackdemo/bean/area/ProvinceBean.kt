@@ -1,8 +1,6 @@
 package com.lodz.android.jetpackdemo.bean.area
 
-import org.litepal.crud.LitePalSupport
-
-class ProvinceBean : LitePalSupport(), AreaBean {
+class ProvinceBean : AreaBean {
 
     var id: Int? = null
 

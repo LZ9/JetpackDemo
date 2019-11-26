@@ -1,8 +1,6 @@
 package com.lodz.android.jetpackdemo.bean.area
 
-import org.litepal.crud.LitePalSupport
-
-class CityBean : LitePalSupport(), AreaBean {
+class CityBean : AreaBean {
 
     var id: Int? = null
     var name: String? = null

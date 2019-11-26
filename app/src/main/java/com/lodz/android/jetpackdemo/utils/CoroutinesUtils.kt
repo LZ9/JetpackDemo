@@ -85,7 +85,7 @@ fun runOnSuspendIOCatchPg(context: Context, msg: String = "", cancelable: Boolea
             e.printStackTrace()
             printTagLog(e)
             if (e !is CancellationException){
-                error(e)
+                runOnMain { error(e) }
             }
         }finally {
             runOnMainCatch({ progressDialog.dismiss() })

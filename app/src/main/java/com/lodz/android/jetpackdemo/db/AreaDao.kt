@@ -21,6 +21,16 @@ class AreaDao {
 
     /** 保存区数据 */
     fun saveCountyBean(bean: CountyBean) {
+        val list = LitePal.findAll(CountyBean::class.java)
+        val daoBean: CountyBean? = if (list.isEmpty()) null else list[0]
+        if (daoBean == null) {
+            bean.save()
+            return
+        }
+        if (daoBean.weather_id == bean.weather_id) {
+            bean.saveOrUpdate()
+            return
+        }
         LitePal.deleteAll(CountyBean::class.java)
         bean.save()
     }
