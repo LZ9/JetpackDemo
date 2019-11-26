@@ -63,14 +63,14 @@ class MainActivity : BaseActivity() {
 
     override fun initData() {
         super.initData()
-        mViewModel.requestData()
+        mViewModel.requestData(getContext())
     }
 
     private fun showChooseAreaDialog() {
         val dialog = ChooseAreaDialog(getContext())
         dialog.setOnSelectedListener { bean ->
             if (bean is CountyBean){
-                mViewModel.requestData(bean)
+                mViewModel.requestData(getContext(), bean)
             }
         }
         dialog.show()

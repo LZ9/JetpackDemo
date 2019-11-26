@@ -13,56 +13,56 @@ import kotlinx.coroutines.*
  * @date 2019/11/20
  */
 /** 主线程执行 */
-fun runOnMain(block: () -> Unit): Job = GlobalScope.launch(Dispatchers.Main) { block() }
+fun runOnMain(action: () -> Unit): Job = GlobalScope.launch(Dispatchers.Main) { action() }
 
 /** 主线程执行捕获异常 */
 @JvmOverloads
-fun runOnMainCatch(block: () -> Unit, failure: (e: Exception) -> Unit = {}): Job =
+fun runOnMainCatch(action: () -> Unit, error: (e: Exception) -> Unit = {}): Job =
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                block()
+                action()
             } catch (e: Exception) {
                 e.printStackTrace()
-                failure(e)
+                error(e)
             }
         }
 
 /** 主线程延迟[timeMillis]毫秒执行 */
-fun runOnMainDelay(timeMillis: Long, block: () -> Unit): Job =
+fun runOnMainDelay(timeMillis: Long, action: () -> Unit): Job =
         GlobalScope.launch(Dispatchers.IO) {
             delay(timeMillis)
             GlobalScope.launch(Dispatchers.Main) {
-                block()
+                action()
             }
         }
 
 /** 异步线程执行 */
-fun runOnIO(block: () -> Unit): Job = GlobalScope.launch(Dispatchers.IO) { block() }
+fun runOnIO(action: () -> Unit): Job = GlobalScope.launch(Dispatchers.IO) { action() }
 
 /** 异步线程执行捕获异常 */
 @JvmOverloads
-fun runOnIOCatch(block: () -> Unit, failure: (e: Exception) -> Unit = {}): Job =
+fun runOnIOCatch(action: () -> Unit, error: (e: Exception) -> Unit = {}): Job =
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                block()
+                action()
             } catch (e: Exception) {
                 e.printStackTrace()
-                failure(e)
+                runOnMain { error(e) }
             }
         }
 
 /** 异步线程执行挂起函数 */
-fun runOnSuspendIO(block: suspend () -> Unit): Job = GlobalScope.launch(Dispatchers.IO) { block() }
+fun runOnSuspendIO(action: suspend () -> Unit): Job = GlobalScope.launch(Dispatchers.IO) { action() }
 
 /** 异步线程执行挂起函数捕获异常 */
 @JvmOverloads
-fun runOnSuspendIOCatch(block: suspend () -> Unit, failure: (e: Exception) -> Unit = {}): Job =
+fun runOnSuspendIOCatch(action: suspend () -> Unit, error: (e: Exception) -> Unit = {}): Job =
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                block()
+                action()
             } catch (e: Exception) {
                 e.printStackTrace()
-                failure(e)
+                runOnMain { error(e) }
             }
         }
 

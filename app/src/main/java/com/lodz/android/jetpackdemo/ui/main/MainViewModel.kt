@@ -1,8 +1,8 @@
 package com.lodz.android.jetpackdemo.ui.main
 
+import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import com.lodz.android.corekt.anko.toastShort
-import com.lodz.android.jetpackdemo.App
 import com.lodz.android.jetpackdemo.api.ApiRepository
 import com.lodz.android.jetpackdemo.bean.area.CountyBean
 import com.lodz.android.jetpackdemo.bean.weather.WeatherBean
@@ -26,17 +26,17 @@ class MainViewModel : BaseViewModel() {
         return mAreaDao.getCountyBean()?.getAreaName() ?: ""
     }
 
-    fun requestData(bean: CountyBean? = null) {
+    fun requestData(context: Context, bean: CountyBean? = null) {
         val daoBean = bean ?: mAreaDao.getCountyBean()
         if (daoBean == null) {
             isAreaSelected.value = true
             return
         }
-        getWeatherData(daoBean)
+        getWeatherDataPg(context, daoBean)
     }
 
-    private fun getWeatherData(bean: CountyBean) {
-        runOnSuspendIOCatchPg(App.get(), action = {
+    private fun getWeatherDataPg(context: Context, bean: CountyBean) {
+        runOnSuspendIOCatchPg(context, action = {
             val data = ApiRepository.get().getWeather(bean.getAreaId()).HeWeather?.get(0) ?: return@runOnSuspendIOCatchPg
             mAreaDao.saveCountyBean(bean)
             runOnMainCatch({
@@ -45,7 +45,8 @@ class MainViewModel : BaseViewModel() {
             })
         }, error = { e ->
             mData.value = null
-            App.get().toastShort(e.message.toString())
+            context.toastShort(e.message.toString())
         })
     }
+
 }
