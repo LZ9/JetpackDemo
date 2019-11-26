@@ -3,13 +3,13 @@ package com.lodz.android.jetpackdemo.ui.area
 import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
 import com.lodz.android.corekt.anko.bindView
+import com.lodz.android.corekt.anko.toastShort
 import com.lodz.android.jetpackdemo.R
 import com.lodz.android.jetpackdemo.api.ApiRepository
 import com.lodz.android.jetpackdemo.bean.area.AreaBean
 import com.lodz.android.jetpackdemo.utils.runOnMain
-import com.lodz.android.jetpackdemo.utils.runOnSuspendIOCatch
+import com.lodz.android.jetpackdemo.utils.runOnSuspendIOCatchPg
 import com.lodz.android.pandora.widget.dialog.BaseBottomDialog
 
 /**
@@ -19,31 +19,31 @@ import com.lodz.android.pandora.widget.dialog.BaseBottomDialog
  */
 class ChooseAreaDialog(context: Context) : BaseBottomDialog(context ){
 
-    /** 确定按钮 */
-    private val mConfirmBtn by bindView<MaterialButton>(R.id.confirm_btn)
-    /** 省列表 */
-    private val mProvinceRv by bindView<RecyclerView>(R.id.province_rv)
+    private val mProvinceRv by bindView<RecyclerView>(R.id.recycler_view)
     private lateinit var mProvinceAdapter: AreaListAdapter
+    /** 省列表 */
     private var mProvinceList: List<AreaBean>? = null
     /** 城市列表 */
-    private val mCityRv by bindView<RecyclerView>(R.id.city_rv)
-    private lateinit var mCityAdapter :AreaListAdapter
     private var mCityList: List<AreaBean>? = null
-    /** 地区列表 */
-    private val mCountyRv by bindView<RecyclerView>(R.id.county_rv)
-    private lateinit var mCountyAdapter :AreaListAdapter
+    /** 区列表 */
     private var mCountyList: List<AreaBean>? = null
+    /** 省Id */
+    private var mProvinceId = ""
+
+    /** 监听器回调 */
+    private var mListener: ((bean: AreaBean) -> Unit)? = null
 
     override fun getLayoutId(): Int = R.layout.dialog_choose_area
 
     override fun findViews() {
         super.findViews()
-        initProvinceRv()
-        initCityRv()
-        initCountyRv()
+        initRecyclerView()
+        setCanceledOnTouchOutside(true)
+        setCancelable(false)
     }
 
-    private fun initProvinceRv() {
+    /** 初始化RecyclerView */
+    private fun initRecyclerView() {
         mProvinceAdapter = AreaListAdapter(getContext())
         val layoutManager = LinearLayoutManager(getContext())
         layoutManager.orientation = RecyclerView.VERTICAL
@@ -53,44 +53,39 @@ class ChooseAreaDialog(context: Context) : BaseBottomDialog(context ){
         mProvinceRv.adapter = mProvinceAdapter
     }
 
-    private fun initCityRv() {
-        mCityAdapter = AreaListAdapter(getContext())
-        val layoutManager = LinearLayoutManager(getContext())
-        layoutManager.orientation = RecyclerView.VERTICAL
-        mCityRv.layoutManager = layoutManager
-        mCityAdapter.onAttachedToRecyclerView(mCityRv)// 如果使用网格布局请设置此方法
-        mCityRv.setHasFixedSize(true)
-        mCityRv.adapter = mCityAdapter
-    }
-
-    private fun initCountyRv() {
-        mCountyAdapter = AreaListAdapter(getContext())
-        val layoutManager = LinearLayoutManager(getContext())
-        layoutManager.orientation = RecyclerView.VERTICAL
-        mCountyRv.layoutManager = layoutManager
-        mCountyAdapter.onAttachedToRecyclerView(mCountyRv)// 如果使用网格布局请设置此方法
-        mCountyRv.setHasFixedSize(true)
-        mCountyRv.adapter = mCountyAdapter
-    }
-
     override fun setListeners() {
         super.setListeners()
 
-        mConfirmBtn.setOnClickListener {
-
-        }
-
         mProvinceAdapter.setOnItemClickListener { viewHolder, item, position ->
-
+            if (mCityList == null) {// 点击省
+                mProvinceId = item.getAreaId()
+                requestCityList(mProvinceId)
+                return@setOnItemClickListener
+            }
+            if (mCountyList == null) {//点击市
+                requestCountyList(mProvinceId, item.getAreaId())
+                return@setOnItemClickListener
+            }
+            mListener?.invoke(item)//回调选择结果
+            dismiss()
         }
+    }
 
-        mCityAdapter.setOnItemClickListener { viewHolder, item, position ->
-
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (mCountyList != null){// 返回市
+            mCountyList = null
+            mProvinceAdapter.setData(mCityList?.toMutableList())
+            mProvinceAdapter.notifyDataSetChanged()
+            return
         }
-
-        mCountyAdapter.setOnItemClickListener { viewHolder, item, position ->
-
+        if (mCityList != null){// 返回省
+            mCityList = null
+            mProvinceAdapter.setData(mProvinceList?.toMutableList())
+            mProvinceAdapter.notifyDataSetChanged()
+            return
         }
+        dismiss()
     }
 
     override fun initData() {
@@ -98,16 +93,47 @@ class ChooseAreaDialog(context: Context) : BaseBottomDialog(context ){
         requestProvinceList()
     }
 
+    /** 获取省列表 */
     private fun requestProvinceList() {
-        runOnSuspendIOCatch({
+        runOnSuspendIOCatchPg(context, action = {
             mProvinceList = ApiRepository.get().getProviceList()
             runOnMain {
                 mProvinceAdapter.setData(mProvinceList?.toMutableList())
                 mProvinceAdapter.notifyDataSetChanged()
             }
-        }, {e: Exception ->
-
+        }, error = { e: Exception ->
+            context.toastShort(e.message.toString())
         })
     }
 
+    /** 获取市列表 */
+    private fun requestCityList(provinceId: String) {
+        runOnSuspendIOCatchPg(context, action = {
+            mCityList = ApiRepository.get().getCityList(provinceId)
+            runOnMain {
+                mProvinceAdapter.setData(mCityList?.toMutableList())
+                mProvinceAdapter.notifyDataSetChanged()
+            }
+        }, error = { e: Exception ->
+            context.toastShort(e.message.toString())
+        })
+    }
+
+    /** 获取区列表 */
+    private fun requestCountyList(provinceId: String, cityId: String) {
+        runOnSuspendIOCatchPg(context, action = {
+            mCountyList = ApiRepository.get().getCountyList(provinceId, cityId)
+            runOnMain {
+                mProvinceAdapter.setData(mCountyList?.toMutableList())
+                mProvinceAdapter.notifyDataSetChanged()
+            }
+        }, error = { e: Exception ->
+            context.toastShort(e.message.toString())
+        })
+    }
+
+    /** 设置选中监听器[listener] */
+    fun setOnSelectedListener(listener: ((bean: AreaBean) -> Unit)?) {
+        mListener = listener
+    }
 }
