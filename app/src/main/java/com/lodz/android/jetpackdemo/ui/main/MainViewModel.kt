@@ -17,10 +17,7 @@ class MainViewModel : BaseViewModel() {
 
     var isAreaSelected = MutableLiveData<Boolean>()
 
-    var mTitleName = MutableLiveData<String>()
-
     var mData = MutableLiveData<WeatherBean?>()
-
 
     fun getTitleName(): String {
         return mAreaDao.getCountyBean()?.getAreaName() ?: ""
@@ -40,7 +37,6 @@ class MainViewModel : BaseViewModel() {
             val data = ApiRepository.get().getWeather(bean.getAreaId()).HeWeather?.get(0) ?: return@runOnSuspendIOCatchPg
             mAreaDao.saveCountyBean(bean)
             runOnMainCatch({
-                mTitleName.value = bean.name
                 mData.value = data
             })
         }, error = { e ->

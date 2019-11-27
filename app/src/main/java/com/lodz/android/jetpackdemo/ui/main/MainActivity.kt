@@ -6,9 +6,9 @@ import android.view.View
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.lodz.android.corekt.anko.bindView
 import com.lodz.android.corekt.anko.dp2px
 import com.lodz.android.corekt.anko.getColorCompat
-import com.lodz.android.corekt.log.PrintLog
 import com.lodz.android.jetpackdemo.R
 import com.lodz.android.jetpackdemo.bean.area.CountyBean
 import com.lodz.android.jetpackdemo.ui.area.ChooseAreaDialog
@@ -16,6 +16,16 @@ import com.lodz.android.pandora.base.activity.BaseActivity
 
 class MainActivity : BaseActivity() {
 
+    /** 地区名称 */
+    private val mAreaNameTv by bindView<TextView>(R.id.area_name_tv)
+    /** 经度 */
+    private val mLonTv by bindView<TextView>(R.id.lon_tv)
+    /** 纬度 */
+    private val mLatTv by bindView<TextView>(R.id.lat_tv)
+    /** 温度 */
+    private val mTmpTv by bindView<TextView>(R.id.tmp_tv)
+    /** 气候 */
+    private val mClimateTv by bindView<TextView>(R.id.climate_tv)
 
     private val mViewModel by lazy { ViewModelProviders.of(this).get(MainViewModel::class.java) }
 
@@ -55,7 +65,15 @@ class MainActivity : BaseActivity() {
                 showStatusNoData()
             }else{
                 getTitleBarLayout().setTitleName(mViewModel.getTitleName())
-                PrintLog.dS("testtag", value.toString())
+                mAreaNameTv.text = StringBuilder()
+                        .append(value.basic?.cnty ?: "").append(" > ")
+                        .append(value.basic?.admin_area ?: "").append(" > ")
+                        .append(value.basic?.parent_city ?: "").append(" > ")
+                        .append(value.basic?.location ?: "")
+                mLonTv.text = StringBuilder().append("经度：").append(value.basic?.lon ?: "")
+                mLatTv.text = StringBuilder().append("纬度：").append(value.basic?.lat ?: "")
+                mTmpTv.text = StringBuilder().append(value.now?.tmp ?: "").append("℃")
+                mClimateTv.text = value.now?.cond_txt ?: ""
                 showStatusCompleted()
             }
         })
